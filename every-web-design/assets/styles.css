@@ -50,15 +50,6 @@ html { scroll-behavior: smooth; }
 .section-glow > .wrap { position: relative; z-index: 1; }
 @media (max-width: 760px) { .section-glow::before { width: 320px; height: 320px; } }
 
-/* ---------- Scroll-driven scrub reveal ---------- */
-.scrub {
-  opacity: var(--p, 0);
-  transform: translateY(calc((1 - var(--p, 0)) * 26px));
-}
-@media (prefers-reduced-motion: reduce) {
-  .scrub { opacity: 1; transform: none; }
-}
-
 /* ---------- Scroll progress ---------- */
 .scroll-progress {
   position: fixed;
@@ -731,6 +722,8 @@ table.compare svg.no { color: var(--border); }
 footer { background: var(--bg-dark-deep); color: var(--muted-dark); padding: 56px 0 32px; border-top: 1px solid var(--border-dark); }
 .footer-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 32px; flex-wrap: wrap; padding-bottom: 40px; border-bottom: 1px solid var(--border-dark); }
 .footer-links { display: flex; gap: 48px; flex-wrap: wrap; }
+.footer-links > div:nth-child(1) { transition-delay: 0ms; }
+.footer-links > div:nth-child(2) { transition-delay: 100ms; }
 .footer-links h4 { color: var(--fg-dark); font-family: 'Inter', sans-serif; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px; }
 .footer-links ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
 .footer-links a { text-decoration: none; color: var(--muted-dark); font-size: 0.92rem; transition: color 200ms var(--ease), transform 200ms var(--ease); display: inline-block; }

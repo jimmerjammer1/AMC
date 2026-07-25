@@ -69,34 +69,6 @@
   }, { passive: true });
   updateScrollState();
 
-  /* ---------- Scroll-driven scrub reveal ---------- */
-  var scrubTargets = document.querySelectorAll('.scrub');
-  if (scrubTargets.length && !prefersReduced) {
-    var scrubTicking = false;
-    function updateScrub() {
-      var vh = window.innerHeight;
-      var start = vh * 0.92;
-      var end = vh * 0.4;
-      scrubTargets.forEach(function (el) {
-        var rect = el.getBoundingClientRect();
-        var p = (start - rect.top) / (start - end);
-        p = Math.max(0, Math.min(1, p));
-        el.style.setProperty('--p', p.toFixed(3));
-      });
-      scrubTicking = false;
-    }
-    window.addEventListener('scroll', function () {
-      if (!scrubTicking) {
-        window.requestAnimationFrame(updateScrub);
-        scrubTicking = true;
-      }
-    }, { passive: true });
-    window.addEventListener('resize', updateScrub);
-    updateScrub();
-  } else {
-    scrubTargets.forEach(function (el) { el.style.setProperty('--p', 1); });
-  }
-
   /* ---------- Count-up numbers ---------- */
   function easeOutQuad(t) { return t * (2 - t); }
   function countUp(el) {
