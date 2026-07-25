@@ -69,6 +69,34 @@
   }, { passive: true });
   updateScrollState();
 
+  /* ---------- Scroll-driven scrub reveal ---------- */
+  var scrubTargets = document.querySelectorAll('.scrub');
+  if (scrubTargets.length && !prefersReduced) {
+    var scrubTicking = false;
+    function updateScrub() {
+      var vh = window.innerHeight;
+      var start = vh * 0.92;
+      var end = vh * 0.4;
+      scrubTargets.forEach(function (el) {
+        var rect = el.getBoundingClientRect();
+        var p = (start - rect.top) / (start - end);
+        p = Math.max(0, Math.min(1, p));
+        el.style.setProperty('--p', p.toFixed(3));
+      });
+      scrubTicking = false;
+    }
+    window.addEventListener('scroll', function () {
+      if (!scrubTicking) {
+        window.requestAnimationFrame(updateScrub);
+        scrubTicking = true;
+      }
+    }, { passive: true });
+    window.addEventListener('resize', updateScrub);
+    updateScrub();
+  } else {
+    scrubTargets.forEach(function (el) { el.style.setProperty('--p', 1); });
+  }
+
   /* ---------- Count-up numbers ---------- */
   function easeOutQuad(t) { return t * (2 - t); }
   function countUp(el) {
@@ -104,6 +132,32 @@
       }, { threshold: 0.6 });
       countTargets.forEach(function (el) { countIo.observe(el); });
     }
+  }
+
+  /* ---------- Hero seal parallax ---------- */
+  var sealWrap = document.querySelector('.seal-wrap');
+  var heroSection = document.querySelector('.hero');
+  if (sealWrap && heroSection && !prefersReduced) {
+    /* The entrance animation uses fill-mode "both", which otherwise
+       keeps overriding any inline transform we set afterward. */
+    sealWrap.addEventListener('animationend', function () {
+      sealWrap.style.animation = 'none';
+    }, { once: true });
+    var parallaxTicking = false;
+    function updateSealParallax() {
+      var rect = heroSection.getBoundingClientRect();
+      if (rect.bottom > 0 && rect.top < window.innerHeight) {
+        var offset = Math.max(0, -rect.top) * 0.12;
+        sealWrap.style.transform = 'translateY(' + offset.toFixed(1) + 'px)';
+      }
+      parallaxTicking = false;
+    }
+    window.addEventListener('scroll', function () {
+      if (!parallaxTicking) {
+        window.requestAnimationFrame(updateSealParallax);
+        parallaxTicking = true;
+      }
+    }, { passive: true });
   }
 
   /* ---------- Process timeline fill ---------- */
