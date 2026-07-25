@@ -225,4 +225,54 @@
       hero.style.setProperty('--my', y + '%');
     });
   }
+
+  /* ---------- Smooth momentum scroll (desktop, wheel only) ---------- */
+  if (window.matchMedia('(pointer: fine)').matches && !prefersReduced) {
+    var current = window.scrollY;
+    var scrollTarget = window.scrollY;
+    var ease = 0.085;
+    var smoothRaf = null;
+
+    function maxScroll() {
+      return document.documentElement.scrollHeight - window.innerHeight;
+    }
+
+    function scrollableAncestor(el) {
+      while (el && el !== document.body) {
+        if (el.matches && el.matches('textarea, select, [data-scrollable]')) return true;
+        var style = window.getComputedStyle(el);
+        if ((style.overflowY === 'auto' || style.overflowY === 'scroll') && el.scrollHeight > el.clientHeight) return true;
+        el = el.parentElement;
+      }
+      return false;
+    }
+
+    function stepSmoothScroll() {
+      current += (scrollTarget - current) * ease;
+      if (Math.abs(scrollTarget - current) < 0.4) {
+        current = scrollTarget;
+        window.scrollTo(0, current);
+        smoothRaf = null;
+        return;
+      }
+      window.scrollTo(0, current);
+      smoothRaf = requestAnimationFrame(stepSmoothScroll);
+    }
+
+    window.addEventListener('wheel', function (e) {
+      if (e.ctrlKey || scrollableAncestor(e.target)) return;
+      if (!smoothRaf) {
+        current = window.scrollY;
+        scrollTarget = window.scrollY;
+      }
+      scrollTarget += e.deltaY;
+      scrollTarget = Math.max(0, Math.min(scrollTarget, maxScroll()));
+      e.preventDefault();
+      if (!smoothRaf) smoothRaf = requestAnimationFrame(stepSmoothScroll);
+    }, { passive: false });
+
+    window.addEventListener('resize', function () {
+      scrollTarget = Math.min(scrollTarget, maxScroll());
+    });
+  }
 })();

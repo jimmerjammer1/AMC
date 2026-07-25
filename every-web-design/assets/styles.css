@@ -1,10 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,900;1,600&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,600&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap');
 
 /* ---------- Tokens ---------- */
 :root {
   --bg: #FAF9F6;
   --bg-dark: #15120D;
+  --bg-dark-deep: #0B0906;
   --bg-dark-elevated: #1E1A13;
+  --bg-dark-plum: #1A1420;
   --fg: #1C1917;
   --fg-dark: #F3EFE6;
   --muted: #6E675E;
@@ -51,7 +53,7 @@ body {
 }
 
 h1, h2, h3, .display {
-  font-family: 'Playfair Display', Georgia, serif;
+  font-family: 'Fraunces', Georgia, serif;
   line-height: 1.05;
   letter-spacing: -0.01em;
   margin: 0;
@@ -65,6 +67,17 @@ h1, h2, h3, .display {
   letter-spacing: 0.18em;
   color: var(--accent);
 }
+
+/* ---------- Standout words ---------- */
+.mark {
+  color: var(--accent-bright);
+  font-style: italic;
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 600;
+  background: linear-gradient(to top, rgba(161, 98, 7, 0.16) 0%, rgba(161, 98, 7, 0.16) 34%, transparent 34%);
+  padding: 0 0.15em;
+}
+.mark.on-dark { color: var(--accent-on-dark); background: linear-gradient(to top, rgba(227, 168, 59, 0.18) 0%, rgba(227, 168, 59, 0.18) 34%, transparent 34%); }
 .eyebrow.on-dark { color: var(--accent-on-dark); }
 
 a { color: inherit; }
@@ -163,7 +176,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   height: 76px;
 }
 .logo {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Fraunces', serif;
   font-weight: 700;
   font-size: 1.25rem;
   letter-spacing: -0.01em;
@@ -237,6 +250,8 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 /* ---------- Sections ---------- */
 section { padding: 96px 0; }
 .section-dark { background: var(--bg-dark); color: var(--fg-dark); }
+.section-dark.section-plum { background: var(--bg-dark-plum); }
+.section-dark.section-deep { background: var(--bg-dark-deep); }
 .section-tight { padding: 64px 0; }
 @media (max-width: 640px) {
   section { padding: 64px 0; }
@@ -280,7 +295,7 @@ section { padding: 96px 0; }
 .hero-actions { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 36px; }
 .hero-trust { display: flex; gap: 28px; margin-top: 56px; flex-wrap: wrap; }
 .hero-trust div { display: flex; flex-direction: column; gap: 4px; }
-.hero-trust strong { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--fg-dark); font-variant-numeric: tabular-nums; }
+.hero-trust strong { font-family: 'Fraunces', serif; font-size: 1.6rem; color: var(--fg-dark); font-variant-numeric: tabular-nums; }
 .hero-trust span { font-size: 0.82rem; color: var(--muted-dark); }
 
 /* ---------- Hero entrance ---------- */
@@ -366,7 +381,7 @@ section { padding: 96px 0; }
   background: var(--bg-dark-elevated);
   text-align: center;
 }
-.seal-price { font-family: 'Playfair Display', serif; font-size: 2.75rem; font-weight: 900; color: var(--accent-on-dark); line-height: 1; font-variant-numeric: tabular-nums; }
+.seal-price { font-family: 'Fraunces', serif; font-size: 2.75rem; font-weight: 900; color: var(--accent-on-dark); line-height: 1; font-variant-numeric: tabular-nums; }
 .seal-label { font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted-dark); margin-top: 10px; }
 .seal-sub { font-size: 0.78rem; color: var(--fg-dark); margin-top: 4px; }
 
@@ -439,7 +454,7 @@ section { padding: 96px 0; }
 }
 .process-item:last-child { border-bottom: 1px solid var(--border); }
 .process-item .step-num {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Fraunces', serif;
   font-size: 2.4rem;
   color: var(--border);
   font-weight: 700;
@@ -525,7 +540,7 @@ section { padding: 96px 0; }
   color: #fff;
 }
 .mock-canvas .tag { font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.75; }
-.mock-canvas h4 { font-family: 'Playfair Display', serif; font-size: 1.5rem; }
+.mock-canvas h4 { font-family: 'Fraunces', serif; font-size: 1.5rem; }
 .mock-meta { padding: 20px 22px; }
 .mock-1 { background: linear-gradient(155deg, #1E1A13 0%, #3A2E12 100%); }
 .mock-2 { background: linear-gradient(155deg, #14201C 0%, #1F3D33 100%); }
@@ -587,7 +602,7 @@ section { padding: 96px 0; }
   border-radius: 100px;
 }
 .plan-name { font-size: 1.1rem; font-weight: 600; }
-.plan-price { font-family: 'Playfair Display', serif; font-size: 3rem; margin-top: 16px; display: flex; align-items: baseline; gap: 8px; font-variant-numeric: tabular-nums; }
+.plan-price { font-family: 'Fraunces', serif; font-size: 3rem; margin-top: 16px; display: flex; align-items: baseline; gap: 8px; font-variant-numeric: tabular-nums; }
 .plan-price .plan-price-sub { font-family: 'Inter', sans-serif; font-size: 1rem; color: var(--muted); font-weight: 500; }
 .plan-card > p.desc { color: var(--muted); margin-top: 12px; }
 .feature-list { list-style: none; margin: 28px 0 0; padding: 0; display: flex; flex-direction: column; gap: 14px; flex: 1; }
@@ -660,7 +675,7 @@ table.compare svg.no { color: var(--border); }
 .form-success svg { color: var(--accent-on-dark); flex: none; margin-top: 2px; }
 
 /* ---------- Footer ---------- */
-footer { background: var(--bg-dark); color: var(--muted-dark); padding: 56px 0 32px; border-top: 1px solid var(--border-dark); }
+footer { background: var(--bg-dark-deep); color: var(--muted-dark); padding: 56px 0 32px; border-top: 1px solid var(--border-dark); }
 .footer-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 32px; flex-wrap: wrap; padding-bottom: 40px; border-bottom: 1px solid var(--border-dark); }
 .footer-links { display: flex; gap: 48px; flex-wrap: wrap; }
 .footer-links h4 { color: var(--fg-dark); font-family: 'Inter', sans-serif; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px; }
