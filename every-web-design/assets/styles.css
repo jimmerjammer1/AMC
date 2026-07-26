@@ -1,12 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,600&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap');
-
 /* ---------- Tokens ---------- */
 :root {
   --bg: #FAF9F6;
   --bg-dark: #15120D;
   --bg-dark-deep: #0B0906;
   --bg-dark-elevated: #1E1A13;
-  --bg-dark-plum: #1A1420;
+  --bg-dark-plum: #20140A;
   --fg: #1C1917;
   --fg-dark: #F3EFE6;
   --muted: #6E675E;
@@ -91,7 +89,7 @@ h1, h2, h3, .display {
 
 /* ---------- Standout words ---------- */
 .mark {
-  color: var(--accent-bright);
+  color: var(--accent);
   font-style: italic;
   font-family: 'Fraunces', Georgia, serif;
   font-weight: 600;
@@ -320,8 +318,55 @@ section { padding: 96px 0; }
   background: radial-gradient(circle at var(--mx) var(--my), rgba(200, 138, 27, 0.18) 0%, rgba(200, 138, 27, 0) 42%);
   pointer-events: none;
   transition: background 600ms var(--ease);
+  z-index: 0;
 }
 @media (prefers-reduced-motion: reduce) { .hero::before { transition: none; } }
+
+/* ---------- Hero aurora (generated, animated art — no photography needed) ---------- */
+.hero-aurora {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+.hero-aurora span {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: 0.55;
+  mix-blend-mode: screen;
+}
+.hero-aurora span:nth-child(1) {
+  width: 420px;
+  height: 420px;
+  left: -8%;
+  top: -12%;
+  background: radial-gradient(circle, rgba(161, 98, 7, 0.55) 0%, rgba(161, 98, 7, 0) 70%);
+  animation: aurora-drift-1 26s ease-in-out infinite;
+}
+.hero-aurora span:nth-child(2) {
+  width: 340px;
+  height: 340px;
+  left: 38%;
+  top: 55%;
+  background: radial-gradient(circle, rgba(227, 168, 59, 0.4) 0%, rgba(227, 168, 59, 0) 70%);
+  animation: aurora-drift-2 32s ease-in-out infinite;
+}
+@keyframes aurora-drift-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(6%, 8%) scale(1.15); }
+}
+@keyframes aurora-drift-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-8%, -6%) scale(1.1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-aurora span { animation: none; }
+}
+@media (max-width: 760px) {
+  .hero-aurora span { filter: blur(50px); }
+}
 .hero-grid {
   position: relative;
   z-index: 1;
@@ -570,6 +615,7 @@ section { padding: 96px 0; }
 }
 .mock-browser-bar span { width: 8px; height: 8px; border-radius: 50%; background: var(--border); }
 .mock-canvas {
+  position: relative;
   height: 220px;
   display: flex;
   flex-direction: column;
@@ -579,9 +625,25 @@ section { padding: 96px 0; }
   padding: 24px;
   text-align: center;
   color: #fff;
+  overflow: hidden;
 }
-.mock-canvas .tag { font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.75; }
-.mock-canvas h4 { font-family: 'Fraunces', serif; font-size: 1.5rem; }
+.mock-canvas .tag { position: relative; z-index: 1; font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.75; }
+.mock-canvas h4 { position: relative; z-index: 1; font-family: 'Fraunces', serif; font-size: 1.5rem; }
+
+/* ---------- Generative line-art (stands in for photography) ---------- */
+.mock-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.55;
+  animation: art-breathe 11s ease-in-out infinite;
+}
+@keyframes art-breathe {
+  0%, 100% { transform: scale(1) translateY(0); }
+  50% { transform: scale(1.045) translateY(-5px); }
+}
+@media (prefers-reduced-motion: reduce) { .mock-art { animation: none; } }
 .mock-meta { padding: 20px 22px; }
 .mock-1 { background: linear-gradient(155deg, #1E1A13 0%, #3A2E12 100%); }
 .mock-2 { background: linear-gradient(155deg, #14201C 0%, #1F3D33 100%); }
