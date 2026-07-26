@@ -602,17 +602,44 @@ section { padding: 96px 0; }
   letter-spacing: 0.06em;
   color: var(--muted-dark);
 }
-.process-path { animation: process-path-drift 12s ease-in-out infinite; transform-origin: center; }
-.process-node { animation: process-node-pulse 3s ease-in-out infinite; transform-origin: center; }
-@keyframes process-path-drift {
-  0%, 100% { transform: scale(1) translateY(0); }
-  50% { transform: scale(1.03) translateY(-4px); }
+.process-path {
+  stroke-dasharray: 520;
+  stroke-dashoffset: 520;
+  opacity: 0.9;
+}
+.process-visual.in-view .process-path {
+  animation: process-path-draw 1.8s var(--ease) forwards, process-path-glow 5s ease-in-out 1.8s infinite;
+}
+.process-node {
+  opacity: 0;
+  transform: scale(0.3);
+  transform-origin: center;
+}
+.process-visual.in-view .process-node {
+  animation: process-node-in 450ms var(--ease) forwards, process-node-pulse 3s ease-in-out infinite;
+}
+.process-visual.in-view .process-node:nth-of-type(1) { animation-delay: 0.35s, 3.2s; }
+.process-visual.in-view .process-node:nth-of-type(2) { animation-delay: 0.85s, 3.7s; }
+.process-visual.in-view .process-node:nth-of-type(3) { animation-delay: 1.3s, 4.2s; }
+.process-visual.in-view .process-node:nth-of-type(4) { animation-delay: 1.75s, 4.65s; }
+@keyframes process-path-draw {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes process-path-glow {
+  0%, 100% { opacity: 0.9; }
+  50% { opacity: 1; }
+}
+@keyframes process-node-in {
+  from { opacity: 0; transform: scale(0.3); }
+  to { opacity: 1; transform: scale(1); }
 }
 @keyframes process-node-pulse {
-  0%, 100% { opacity: 0.65; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.28); }
+  0%, 100% { opacity: 0.85; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.2); }
 }
-@media (prefers-reduced-motion: reduce) { .process-path, .process-node { animation: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .process-path, .process-node { animation: none; opacity: 1; transform: none; stroke-dashoffset: 0; }
+}
 @media (max-width: 900px) {
   .process-grid { grid-template-columns: 1fr; }
   .process-visual { display: none; }
