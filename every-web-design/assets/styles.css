@@ -60,6 +60,30 @@ html { scroll-behavior: smooth; }
 }
 @media (prefers-reduced-motion: reduce) { .section-glow::before { animation: none; } }
 
+.section-glow.glow-double::after {
+  content: '';
+  position: absolute;
+  bottom: -140px;
+  left: -100px;
+  width: 340px;
+  height: 340px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(200, 138, 27, 0.10) 0%, rgba(200, 138, 27, 0) 70%);
+  pointer-events: none;
+  z-index: 0;
+  animation: section-glow-drift-left 27s ease-in-out infinite;
+}
+.section-glow.glow-double.glow-left::after {
+  left: auto;
+  right: -100px;
+  animation-name: section-glow-drift;
+}
+.section-dark.section-glow.glow-double::after {
+  background: radial-gradient(circle, rgba(227, 168, 59, 0.13) 0%, rgba(227, 168, 59, 0) 70%);
+}
+@media (max-width: 760px) { .section-glow.glow-double::after { width: 220px; height: 220px; } }
+@media (prefers-reduced-motion: reduce) { .section-glow.glow-double::after { animation: none; } }
+
 /* ---------- Scroll progress ---------- */
 .scroll-progress {
   position: fixed;
