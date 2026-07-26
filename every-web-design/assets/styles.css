@@ -61,17 +61,10 @@ html { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) { .section-glow::before { animation: none; } }
 @media (max-width: 760px) { .section-glow::before { width: min(var(--glow-w), 260px); } }
 
-/* One bespoke placement per section — varied corners, sizes, hues, timing */
-.glow-value { --glow-w: 360px; --glow-top: -130px; --glow-right: -90px; --glow-color: rgba(161, 98, 7, 0.11); --glow-dur: 19s; --glow-dx: -6%; --glow-dy: 5%; }
-.glow-process { --glow-w: 300px; --glow-top: 30%; --glow-left: -100px; --glow-color: rgba(200, 138, 27, 0.09); --glow-dur: 28s; --glow-dx: 6%; --glow-dy: -5%; }
+/* Reserved for the dark CTA moments only — a spotlight, not a room light. */
 .glow-plum { --glow-w: 440px; --glow-bottom: -170px; --glow-right: -100px; --glow-color: rgba(227, 168, 59, 0.15); --glow-dur: 23s; --glow-dx: -4%; --glow-dy: -6%; }
-.glow-faq { --glow-w: 280px; --glow-bottom: -90px; --glow-right: 12%; --glow-color: rgba(161, 98, 7, 0.08); --glow-dur: 32s; --glow-dx: 3%; --glow-dy: 4%; }
 .glow-contact { --glow-w: 400px; --glow-top: -110px; --glow-left: -90px; --glow-color: rgba(227, 168, 59, 0.14); --glow-dur: 21s; --glow-dx: 5%; --glow-dy: 3%; }
-.glow-portfolio-hero { --glow-w: 320px; --glow-top: -110px; --glow-right: -80px; --glow-color: rgba(161, 98, 7, 0.1); --glow-dur: 25s; }
-.glow-portfolio-grid { --glow-w: 420px; --glow-bottom: -160px; --glow-left: -110px; --glow-color: rgba(200, 138, 27, 0.1); --glow-dur: 30s; --glow-dx: 6%; --glow-dy: -4%; }
 .glow-portfolio-cta { --glow-w: 380px; --glow-top: -110px; --glow-right: -80px; --glow-color: rgba(227, 168, 59, 0.14); --glow-dur: 22s; }
-.glow-pricing-hero { --glow-w: 340px; --glow-top: -150px; --glow-left: 32%; --glow-color: rgba(161, 98, 7, 0.07); --glow-dur: 26s; --glow-dx: -3%; --glow-dy: 5%; }
-.glow-pricing-grid { --glow-w: 400px; --glow-bottom: -140px; --glow-right: -90px; --glow-color: rgba(200, 138, 27, 0.1); --glow-dur: 24s; --glow-dx: -5%; --glow-dy: 5%; }
 .glow-pricing-cta { --glow-w: 380px; --glow-bottom: -120px; --glow-left: -90px; --glow-color: rgba(227, 168, 59, 0.13); --glow-dur: 29s; }
 
 /* ---------- Scroll progress ---------- */
