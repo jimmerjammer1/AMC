@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Studyflow — Dashboard</title>
+<meta name="description" content="Personal study hour tracker and curated video library." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📘</text></svg>" />
+<link rel="stylesheet" href="shared/styles.css" />
+</head>
+<body>
+<div id="root"></div>
+
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="shared/store.js"></script>
+<script src="shared/nav.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+const S = window.Store;
+
+function CountUp({ value, suffix }) {
+  const [display, setDisplay] = useState(0);
+  const ref = useRef(null);
+  useEffect(() => {
+    const start = performance.now();
+    const duration = 900;
+    function tick(now) {
+      const p = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setDisplay(value * eased);
+      if (p < 1) ref.current = requestAnimationFrame(tick);
+    }
+    ref.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(ref.current);
+  }, [value]);
+  return <span>{display.toFixed(value < 10 && value % 1 !== 0 ? 1 : 0)}{suffix}</span>;
+}
+
+function StatCard({ label, value, suffix, sub }) {
+  return (
+    <div className="sf-card sf-stat hoverable">
+      <div className="sf-stat-label">{label}</div>
+      <div className="sf-stat-value"><CountUp value={value} suffix={suffix} /></div>
+      {sub && <div className="sf-stat-sub">{sub}</div>}
+    </div>
+  );
+}
+
+function Dashboard() {
+  const [sessions, setSessions] = useState([]);
+  const [subjects, setSubjects] = useState([]);
+  const [videos, setVideos] = useState([]);
+
+  useEffect(() => {
+    setSessions(S.getSessions());
+    setSubjects(S.getSubjects());
+    setVideos(S.getVideos());
+  }, []);
+
+  const totalMin = S.totalMinutes(sessions);
+  const todayMin = S.minutesToday(sessions);
+  const weekMin = S.minutesThisWeek(sessions);
+  const streak = S.getStreak(sessions);
+  const bySubject = S.bySubject(sessions, subjects).filter((r) => r.minutes > 0);
+  const maxSubjectMin = Math.max(1, ...bySubject.map((r) => r.minutes));
+  const recent = sessions.slice(0, 5);
+  const topVideos = [...videos].sort((a, b) => b.rating - a.rating).slice(0, 3);
+
+  return (
+    <React.Fragment>
+      {SFNav("dashboard")}
+      <main className="sf-page">
+        <span className="sf-eyebrow">Study Command Center</span>
+        <h1 className="sf-title">Welcome back — let's make today count.</h1>
+        <p className="sf-subtitle">Track focused hours, watch progress build day by day, and keep the videos that actually taught you something in one place.</p>
+
+        <div className="sf-grid cols-4 sf-stagger" style={{ marginTop: 30 }}>
+          <StatCard label="Today" value={todayMin / 60} suffix="h" sub={S.formatMinutes(todayMin)} />
+          <StatCard label="This Week" value={weekMin / 60} suffix="h" sub={S.formatMinutes(weekMin)} />
+          <StatCard label="All Time" value={totalMin / 60} suffix="h" sub={sessions.length + (sessions.length === 1 ? " session logged" : " sessions logged")} />
+          <StatCard label="Streak" value={streak} suffix=" 🔥" sub={streak === 1 ? "day in a row" : "days in a row"} />
+        </div>
+
+        <div className="sf-grid cols-2" style={{ marginTop: 34, alignItems: "start" }}>
+          <div className="sf-card hoverable" style={{ padding: 24, animation: "fadeInUp .6s ease .1s both" }}>
+            <h3 style={{ fontSize: "1.05rem", marginBottom: 4 }}>Ready to focus?</h3>
+            <p style={{ color: "var(--text-muted)", fontSize: "0.88rem", marginTop: 6, lineHeight: 1.5 }}>
+              Start a live session or log time you've already put in.
+            </p>
+            <a href="log.html" className="sf-btn primary" style={{ marginTop: 16 }}>
+              <span>Open Study Log</span>
+              <span aria-hidden="true">→</span>
+            </a>
+
+            <h3 style={{ fontSize: "0.95rem", marginTop: 26, marginBottom: 12, color: "var(--text-muted)" }}>Time by subject</h3>
+            {bySubject.length === 0 && <p style={{ color: "var(--text-faint)", fontSize: "0.85rem" }}>No sessions yet — log your first one.</p>}
+            {bySubject.map((row) => (
+              <div key={row.subject.id} style={{ marginBottom: 12 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.82rem", marginBottom: 5 }}>
+                  <span style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 600 }}>
+                    <span className="sf-dot" style={{ background: row.subject.color }}></span>
+                    {row.subject.name}
+                  </span>
+                  <span style={{ color: "var(--text-muted)" }}>{S.formatMinutes(row.minutes)}</span>
+                </div>
+                <div className="sf-progress">
+                  <div className="sf-progress-fill" style={{ width: (row.minutes / maxSubjectMin) * 100 + "%", background: row.subject.color }}></div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="sf-card hoverable" style={{ padding: 24, animation: "fadeInUp .6s ease .18s both" }}>
+            <h3 style={{ fontSize: "1.05rem", marginBottom: 14 }}>Recent sessions</h3>
+            {recent.length === 0 && (
+              <div className="sf-empty">
+                <div className="sf-empty-icon">🗒️</div>
+                <div>Nothing logged yet.</div>
+              </div>
+            )}
+            {recent.map((s) => {
+              const subj = subjects.find((x) => x.id === s.subjectId);
+              return (
+                <div key={s.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: "1px solid var(--border)" }}>
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: "0.88rem", display: "flex", alignItems: "center", gap: 6 }}>
+                      <span className="sf-dot" style={{ background: subj ? subj.color : "#94a3b8" }}></span>
+                      {subj ? subj.name : "Deleted subject"}
+                    </div>
+                    <div style={{ fontSize: "0.75rem", color: "var(--text-faint)", marginTop: 2 }}>{s.date}</div>
+                  </div>
+                  <div className="sf-chip">{S.formatMinutes(s.minutes)}</div>
+                </div>
+              );
+            })}
+            {sessions.length > 0 && (
+              <a href="log.html" style={{ display: "inline-block", marginTop: 14, fontSize: "0.85rem", color: "var(--blue-600)", fontWeight: 600, textDecoration: "none" }}>
+                View full log →
+              </a>
+            )}
+          </div>
+        </div>
+
+        <div style={{ marginTop: 34 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+            <h3 style={{ fontSize: "1.05rem" }}>Top picks from your video library</h3>
+            <a href="videos.html" style={{ fontSize: "0.85rem", color: "var(--blue-600)", fontWeight: 600, textDecoration: "none" }}>See all →</a>
+          </div>
+          {topVideos.length === 0 ? (
+            <div className="sf-card sf-empty" style={{ marginTop: 14 }}>
+              <div className="sf-empty-icon">🎬</div>
+              <div>No videos saved yet — add the ones that actually helped.</div>
+              <a href="videos.html" className="sf-btn ghost" style={{ marginTop: 14 }}>Add a video</a>
+            </div>
+          ) : (
+            <div className="sf-grid cols-3" style={{ marginTop: 14 }}>
+              {topVideos.map((v, i) => (
+                <div key={v.id} className="sf-card hoverable" style={{ overflow: "hidden", animation: `fadeInUp .5s ease ${0.05 * i}s both` }}>
+                  <div className="sf-video-thumb" style={{ cursor: "default" }}>
+                    <img src={`https://img.youtube.com/vi/${v.videoId}/hqdefault.jpg`} alt={v.title} />
+                  </div>
+                  <div style={{ padding: "14px 16px" }}>
+                    <div style={{ fontWeight: 600, fontSize: "0.88rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{v.title}</div>
+                    <div style={{ marginTop: 6, color: "#f59e0b", fontSize: "0.8rem" }}>{"★".repeat(v.rating)}{"☆".repeat(5 - v.rating)}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <footer className="sf-foot">Studyflow — private, local, and only for you.</footer>
+      </main>
+    </React.Fragment>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<Dashboard />);
+</script>
+</body>
+</html>

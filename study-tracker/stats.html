@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Studyflow — Stats</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📘</text></svg>" />
+<link rel="stylesheet" href="shared/styles.css" />
+</head>
+<body>
+<div id="root"></div>
+
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="shared/store.js"></script>
+<script src="shared/nav.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script type="text/babel">
+const { useState, useEffect } = React;
+const S = window.Store;
+const DAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
+
+function BarChart({ data }) {
+  const max = Math.max(1, ...data.map((d) => d.minutes));
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { const t = setTimeout(() => setMounted(true), 60); return () => clearTimeout(t); }, []);
+  return (
+    <div className="sf-bars">
+      {data.map((d) => {
+        const dt = new Date(d.date + "T00:00:00");
+        return (
+          <div className="sf-bar-col" key={d.date} title={`${d.date}: ${S.formatMinutes(d.minutes)}`}>
+            <div className="sf-bar" style={{ height: mounted ? Math.max(4, (d.minutes / max) * 100) + "%" : "0%" }}></div>
+            <div className="sf-bar-label">{DAY_LABELS[dt.getDay()]}</div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function Donut({ rows }) {
+  const total = rows.reduce((sum, r) => sum + r.minutes, 0);
+  let acc = 0;
+  const stops = rows.map((r) => {
+    const start = (acc / (total || 1)) * 360;
+    acc += r.minutes;
+    const end = (acc / (total || 1)) * 360;
+    return `${r.subject.color} ${start}deg ${end}deg`;
+  });
+  const gradient = total > 0 ? `conic-gradient(${stops.join(",")})` : "conic-gradient(var(--bg-soft) 0deg 360deg)";
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 24, flexWrap: "wrap" }}>
+      <div
+        className="sf-donut"
+        style={{
+          width: 150, height: 150, borderRadius: "50%",
+          background: gradient,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          boxShadow: "var(--shadow-sm)", flexShrink: 0,
+        }}
+      >
+        <div style={{ width: 96, height: 96, borderRadius: "50%", background: "var(--surface)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: "1.15rem" }}>{S.formatHoursDecimal(total)}h</div>
+          <div style={{ fontSize: "0.65rem", color: "var(--text-faint)" }}>total</div>
+        </div>
+      </div>
+      <div style={{ flex: 1, minWidth: 180 }}>
+        {rows.length === 0 && <div style={{ color: "var(--text-faint)", fontSize: "0.85rem" }}>No subject data yet.</div>}
+        {rows.map((r) => (
+          <div key={r.subject.id} style={{ display: "flex", justifyContent: "space-between", fontSize: "0.82rem", padding: "6px 0" }}>
+            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span className="sf-dot" style={{ background: r.subject.color }}></span>
+              {r.subject.name}
+            </span>
+            <span style={{ color: "var(--text-muted)" }}>{total > 0 ? Math.round((r.minutes / total) * 100) : 0}%</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function HeatCalendar({ sessions }) {
+  const byDate = {};
+  sessions.forEach((s) => { byDate[s.date] = (byDate[s.date] || 0) + s.minutes; });
+  const days = [];
+  for (let i = 90; i >= 0; i--) days.push(S.daysAgoISO(i));
+  const max = Math.max(1, ...Object.values(byDate));
+
+  function shade(minutes) {
+    if (!minutes) return "var(--bg-soft)";
+    const t = Math.min(1, minutes / max);
+    const alpha = 0.22 + t * 0.78;
+    return `rgba(37, 99, 235, ${alpha.toFixed(2)})`;
+  }
+
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(13, 1fr)", gap: 4 }}>
+      {days.map((d, i) => (
+        <div
+          key={d}
+          title={`${d}: ${S.formatMinutes(byDate[d] || 0)}`}
+          style={{
+            aspectRatio: "1", borderRadius: 4, background: shade(byDate[d]),
+            animation: `popIn .3s ease ${Math.min(i, 60) * 0.006}s both`,
+          }}
+        ></div>
+      ))}
+    </div>
+  );
+}
+
+function StatsPage() {
+  const [sessions, setSessions] = useState([]);
+  const [subjects, setSubjects] = useState([]);
+
+  useEffect(() => {
+    setSessions(S.getSessions());
+    setSubjects(S.getSubjects());
+  }, []);
+
+  const dayData = S.byDay(sessions, 14);
+  const bySubject = S.bySubject(sessions, subjects).filter((r) => r.minutes > 0);
+  const total = S.totalMinutes(sessions);
+  const avgPerDay = dayData.length ? total / Math.max(1, sessions.length ? new Set(sessions.map((s) => s.date)).size : 1) : 0;
+  const bestDay = [...dayData].sort((a, b) => b.minutes - a.minutes)[0];
+  const streak = S.getStreak(sessions);
+
+  return (
+    <React.Fragment>
+      {SFNav("stats")}
+      <main className="sf-page">
+        <span className="sf-eyebrow">Insights</span>
+        <h1 className="sf-title">See the pattern in your progress.</h1>
+        <p className="sf-subtitle">Fourteen days of momentum, a subject breakdown, and a 90-day view of how consistent you've been.</p>
+
+        <div className="sf-grid cols-4 sf-stagger" style={{ marginTop: 30 }}>
+          <div className="sf-card sf-stat hoverable">
+            <div className="sf-stat-label">Total Logged</div>
+            <div className="sf-stat-value">{S.formatHoursDecimal(total)}h</div>
+            <div className="sf-stat-sub">{sessions.length} {sessions.length === 1 ? "session" : "sessions"}</div>
+          </div>
+          <div className="sf-card sf-stat hoverable">
+            <div className="sf-stat-label">Current Streak</div>
+            <div className="sf-stat-value">{streak}d</div>
+            <div className="sf-stat-sub">keep it going</div>
+          </div>
+          <div className="sf-card sf-stat hoverable">
+            <div className="sf-stat-label">Avg / Active Day</div>
+            <div className="sf-stat-value">{S.formatHoursDecimal(avgPerDay)}h</div>
+            <div className="sf-stat-sub">on days you studied</div>
+          </div>
+          <div className="sf-card sf-stat hoverable">
+            <div className="sf-stat-label">Best Day (14d)</div>
+            <div className="sf-stat-value">{bestDay ? S.formatHoursDecimal(bestDay.minutes) : "0.0"}h</div>
+            <div className="sf-stat-sub">{bestDay && bestDay.minutes > 0 ? bestDay.date : "no data yet"}</div>
+          </div>
+        </div>
+
+        <div className="sf-grid cols-2" style={{ marginTop: 28, alignItems: "start" }}>
+          <div className="sf-card hoverable" style={{ padding: 26, animation: "fadeInUp .55s ease .1s both" }}>
+            <h3 style={{ fontSize: "1.02rem", marginBottom: 16 }}>Last 14 days</h3>
+            <BarChart data={dayData} />
+          </div>
+          <div className="sf-card hoverable" style={{ padding: 26, animation: "fadeInUp .55s ease .18s both" }}>
+            <h3 style={{ fontSize: "1.02rem", marginBottom: 16 }}>By subject</h3>
+            <Donut rows={bySubject} />
+          </div>
+        </div>
+
+        <div className="sf-card hoverable" style={{ padding: 26, marginTop: 24, animation: "fadeInUp .55s ease .24s both" }}>
+          <h3 style={{ fontSize: "1.02rem", marginBottom: 16 }}>Consistency — last 90 days</h3>
+          <HeatCalendar sessions={sessions} />
+        </div>
+
+        <footer className="sf-foot">Studyflow — private, local, and only for you.</footer>
+      </main>
+    </React.Fragment>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<StatsPage />);
+</script>
+</body>
+</html>
