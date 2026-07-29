@@ -112,6 +112,50 @@ function SubjectPicker({ subjects, value, onChange, onAdd }) {
   );
 }
 
+function AddExtraTime({ onAdd }) {
+  const [customMinutes, setCustomMinutes] = useState("");
+
+  function addCustom() {
+    const m = parseFloat(customMinutes);
+    if (m > 0) {
+      onAdd(m);
+      setCustomMinutes("");
+    }
+  }
+
+  return (
+    <div className="sf-field">
+      <label className="sf-label">Already put in time? Add it to the clock</label>
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
+        {[5, 15, 30, 60].map((m) => (
+          <button
+            key={m}
+            type="button"
+            className="sf-btn ghost"
+            style={{ padding: "7px 11px", fontSize: "0.7rem" }}
+            onClick={() => onAdd(m)}
+          >
+            +{m < 60 ? m + "m" : "1h"}
+          </button>
+        ))}
+        <input
+          className="sf-input"
+          type="number"
+          min="1"
+          placeholder="Custom min"
+          value={customMinutes}
+          onChange={(e) => setCustomMinutes(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addCustom(); } }}
+          style={{ flex: "1 1 100px", minWidth: 90 }}
+        />
+        <button type="button" className="sf-btn ghost" style={{ padding: "7px 11px", fontSize: "0.7rem" }} onClick={addCustom}>
+          Add
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function TimerCard({ subjects, onSaved }) {
   const [subjectId, setSubjectId] = useState(subjects[0] ? subjects[0].id : "");
   const [note, setNote] = useState("");
@@ -133,6 +177,7 @@ function TimerCard({ subjects, onSaved }) {
   }, [running]);
 
   const addSubject = (name) => window.Store.addSubject(name);
+  const addExtraMinutes = (m) => setElapsed((e) => e + Math.round(m * 60));
 
   function handleStop() {
     setRunning(false);
@@ -157,6 +202,7 @@ function TimerCard({ subjects, onSaved }) {
           <label className="sf-label">Note (optional)</label>
           <input className="sf-input" placeholder="What are you working on?" value={note} onChange={(e) => setNote(e.target.value)} />
         </div>
+        <AddExtraTime onAdd={addExtraMinutes} />
       </div>
 
       <div style={{ display: "flex", gap: 10 }}>
