@@ -18,7 +18,7 @@
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
 <script type="text/babel">
-const { useState, useEffect } = React;
+const { useState, useEffect, useRef } = React;
 const S = window.Store;
 const DAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
 
@@ -113,14 +113,68 @@ function HeatCalendar({ sessions }) {
   );
 }
 
+function DataBackup({ onImported }) {
+  const [status, setStatus] = useState("");
+  const fileRef = useRef(null);
+
+  function handleExport() {
+    const data = S.exportData();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `studyflow-backup-${S.todayISO()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    setStatus("Backup downloaded.");
+  }
+
+  function handleImport(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(reader.result);
+        S.importData(data, "merge");
+        setStatus("Backup imported — merged into your data.");
+        onImported();
+      } catch (err) {
+        setStatus("Couldn't read that file: " + err.message);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  }
+
+  return (
+    <div className="sf-card hoverable" style={{ padding: 26, marginTop: 24 }}>
+      <h3 style={{ fontSize: "1.02rem", marginBottom: 6 }}>Your data</h3>
+      <p style={{ color: "var(--text-muted)", fontSize: "0.85rem", marginBottom: 16 }}>
+        Everything lives only in this browser. Export a backup to move it to another device or app, or import one to merge it back in.
+      </p>
+      <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+        <button type="button" className="sf-btn primary" onClick={handleExport}>Export backup</button>
+        <button type="button" className="sf-btn ghost" onClick={() => fileRef.current.click()}>Import backup</button>
+        <input ref={fileRef} type="file" accept="application/json" onChange={handleImport} style={{ display: "none" }} />
+      </div>
+      {status && <p style={{ marginTop: 12, fontSize: "0.82rem", color: "var(--ink-2)" }}>{status}</p>}
+    </div>
+  );
+}
+
 function StatsPage() {
   const [sessions, setSessions] = useState([]);
   const [subjects, setSubjects] = useState([]);
 
-  useEffect(() => {
+  function refresh() {
     setSessions(S.getSessions());
     setSubjects(S.getSubjects());
-  }, []);
+  }
+
+  useEffect(refresh, []);
 
   const dayData = S.byDay(sessions, 14);
   const bySubject = S.bySubject(sessions, subjects).filter((r) => r.minutes > 0);
@@ -175,6 +229,8 @@ function StatsPage() {
           <h3 style={{ fontSize: "1.02rem", marginBottom: 16 }}>Consistency — last 90 days</h3>
           <HeatCalendar sessions={sessions} />
         </div>
+
+        <DataBackup onImported={refresh} />
 
         <footer className="sf-foot">Studyflow — private, local, and only for you.</footer>
       </main>

@@ -200,6 +200,36 @@
         }))
         .sort((a, b) => b.minutes - a.minutes);
     },
+
+    // Backup / transfer
+    exportData() {
+      return {
+        exportedAt: new Date().toISOString(),
+        subjects: read(KEYS.subjects, []),
+        sessions: read(KEYS.sessions, []),
+        videos: read(KEYS.videos, []),
+      };
+    },
+    importData(data, mode) {
+      if (!data || !Array.isArray(data.subjects) || !Array.isArray(data.sessions) || !Array.isArray(data.videos)) {
+        throw new Error("That doesn't look like a Studyflow backup file.");
+      }
+      if (mode === "replace") {
+        write(KEYS.subjects, data.subjects);
+        write(KEYS.sessions, data.sessions);
+        write(KEYS.videos, data.videos);
+        return;
+      }
+      const existingSubjects = read(KEYS.subjects, []);
+      const existingSessions = read(KEYS.sessions, []);
+      const existingVideos = read(KEYS.videos, []);
+      const subjectIds = new Set(existingSubjects.map((s) => s.id));
+      const sessionIds = new Set(existingSessions.map((s) => s.id));
+      const videoIds = new Set(existingVideos.map((v) => v.id));
+      write(KEYS.subjects, existingSubjects.concat(data.subjects.filter((s) => !subjectIds.has(s.id))));
+      write(KEYS.sessions, existingSessions.concat(data.sessions.filter((s) => !sessionIds.has(s.id))));
+      write(KEYS.videos, existingVideos.concat(data.videos.filter((v) => !videoIds.has(v.id))));
+    },
   };
 
   window.Store = Store;
