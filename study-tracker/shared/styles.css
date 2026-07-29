@@ -8,21 +8,21 @@
 */
 
 :root {
-  --paper: #e9eef2;
-  --paper-deep: #dfe6ec;
-  --panel: #fbfcfb;
-  --rule: #c7d2db;
-  --rule-strong: #a9b8c5;
+  --paper: #e4ecf5;
+  --paper-deep: #d7e3f0;
+  --panel: #fbfcff;
+  --rule: #becfe0;
+  --rule-strong: #93aec8;
 
-  --ink: #16324f;
-  --ink-2: #2c5178;
+  --ink: #14385f;
+  --ink-2: #275f97;
   --ink-soft: #44607c;
   --text: #16283a;
   --text-muted: #44607c;
-  --text-faint: #506882;
+  --text-faint: #495f78;
 
   --accent: #a8462c;
-  --gold: #8a6110;
+  --gold: #7d570d;
 
   --radius: 3px;
   --notch: 16px;
@@ -154,11 +154,11 @@ a {
 
 .sf-link.active {
   color: var(--ink);
-  border-bottom-color: var(--accent);
+  border-bottom-color: var(--ink-2);
 }
 
 .sf-link.active .sf-link-icon {
-  color: var(--accent);
+  color: var(--ink-2);
 }
 
 /* ---------- Layout ---------- */
@@ -183,7 +183,7 @@ a {
 
 .sf-eyebrow::before {
   content: "§";
-  color: var(--accent);
+  color: var(--ink-2);
 }
 
 .sf-title {
