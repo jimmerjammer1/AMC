@@ -4,7 +4,8 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Studyflow — Videos</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📘</text></svg>" />
+<meta name="description" content="A curated library of the YouTube videos that actually helped, with notes, tags, and ratings." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 fill=%27%23e9eef2%27/%3E%3Crect x=%2712%27 y=%2712%27 width=%2776%27 height=%2776%27 fill=%27none%27 stroke=%27%2316324f%27 stroke-width=%276%27/%3E%3Ctext x=%2750%27 y=%2766%27 font-family=%27Georgia,serif%27 font-style=%27italic%27 font-size=%2748%27 fill=%27%2316324f%27 text-anchor=%27middle%27%3ES%3C/text%3E%3C/svg%3E" />
 <link rel="stylesheet" href="shared/styles.css" />
 </head>
 <body>
@@ -22,17 +23,21 @@ const S = window.Store;
 
 function StarPicker({ value, onChange }) {
   return (
-    <div style={{ display: "flex", gap: 4 }}>
+    <div style={{ display: "flex", gap: 4 }} role="radiogroup" aria-label="Rating">
       {[1, 2, 3, 4, 5].map((n) => (
-        <span
+        <button
           key={n}
+          type="button"
+          role="radio"
+          aria-checked={n === value}
+          aria-label={n + (n === 1 ? " star" : " stars")}
           onClick={() => onChange(n === value ? 0 : n)}
-          style={{ cursor: "pointer", fontSize: "1.3rem", color: n <= value ? "#f59e0b" : "#d8e0f2", transition: "transform .15s ease" }}
+          style={{ cursor: "pointer", fontSize: "1.3rem", lineHeight: 1, color: n <= value ? "var(--gold)" : "var(--rule-strong)", background: "none", border: "none", padding: 2, transition: "transform .15s ease" }}
           onMouseDown={(e) => (e.currentTarget.style.transform = "scale(1.2)")}
           onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
         >
           ★
-        </span>
+        </button>
       ))}
     </div>
   );
@@ -73,7 +78,7 @@ function AddVideoModal({ subjects, onClose, onAdded }) {
         <div className="sf-field">
           <label className="sf-label">YouTube URL</label>
           <input className="sf-input" autoFocus placeholder="https://youtube.com/watch?v=..." value={url} onChange={(e) => { setUrl(e.target.value); setError(""); }} />
-          {error && <div style={{ color: "#dc2626", fontSize: "0.78rem", marginTop: 6 }}>{error}</div>}
+          {error && <div style={{ color: "var(--accent)", fontSize: "0.78rem", marginTop: 6 }}>{error}</div>}
         </div>
         <div className="sf-field">
           <label className="sf-label">Title</label>
@@ -110,8 +115,8 @@ function AddVideoModal({ subjects, onClose, onAdded }) {
 function VideoCard({ video, subject, onDelete, index }) {
   const [playing, setPlaying] = useState(false);
   return (
-    <div className="sf-card hoverable" style={{ overflow: "hidden", animation: `fadeInUp .5s ease ${Math.min(index, 8) * 0.05}s both` }}>
-      <div className="sf-video-thumb" onClick={() => setPlaying(true)}>
+    <div className="sf-card hoverable" style={{ overflow: "hidden" }}>
+      <div className="sf-video-thumb">
         {playing ? (
           <iframe
             src={`https://www.youtube.com/embed/${video.videoId}?autoplay=1`}
@@ -120,10 +125,10 @@ function VideoCard({ video, subject, onDelete, index }) {
             allowFullScreen
           />
         ) : (
-          <React.Fragment>
-            <img src={`https://img.youtube.com/vi/${video.videoId}/hqdefault.jpg`} alt={video.title} loading="lazy" />
+          <button type="button" onClick={() => setPlaying(true)} aria-label={"Play " + video.title} style={{ all: "unset", cursor: "pointer", display: "block", width: "100%", height: "100%", position: "relative" }}>
+            <img src={`https://img.youtube.com/vi/${video.videoId}/hqdefault.jpg`} alt="" loading="lazy" />
             <div className="play-btn"><span>▶</span></div>
-          </React.Fragment>
+          </button>
         )}
       </div>
       <div style={{ padding: "16px 18px" }}>
@@ -131,7 +136,7 @@ function VideoCard({ video, subject, onDelete, index }) {
           <div style={{ fontWeight: 700, fontSize: "0.92rem", lineHeight: 1.3 }}>{video.title}</div>
           <button onClick={() => onDelete(video.id)} aria-label="Delete video" style={{ border: "none", background: "none", cursor: "pointer", color: "var(--text-faint)", flexShrink: 0 }}>✕</button>
         </div>
-        {video.rating > 0 && <div style={{ color: "#f59e0b", fontSize: "0.85rem", marginTop: 6 }}>{"★".repeat(video.rating)}{"☆".repeat(5 - video.rating)}</div>}
+        {video.rating > 0 && <div style={{ color: "var(--gold)", fontSize: "0.85rem", marginTop: 6 }}>{"★".repeat(video.rating)}{"☆".repeat(5 - video.rating)}</div>}
         {video.notes && <p style={{ fontSize: "0.82rem", color: "var(--text-muted)", marginTop: 8, lineHeight: 1.5 }}>{video.notes}</p>}
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 12 }}>
           {subject && <span className="sf-chip" style={{ background: subject.color + "1a", color: subject.color, borderColor: subject.color + "33" }}>{subject.name}</span>}
@@ -185,7 +190,7 @@ function VideosPage() {
 
         {filtered.length === 0 ? (
           <div className="sf-card sf-empty" style={{ marginTop: 24 }}>
-            <div className="sf-empty-icon">🎬</div>
+            <div className="sf-empty-mark"></div>
             <div>{videos.length === 0 ? "No videos saved yet." : "No videos match your filters."}</div>
             {videos.length === 0 && <button className="sf-btn ghost" style={{ marginTop: 14 }} onClick={() => setShowModal(true)}>Add your first video</button>}
           </div>

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Studyflow — Dashboard</title>
 <meta name="description" content="Personal study hour tracker and curated video library." />
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📘</text></svg>" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 fill=%27%23e9eef2%27/%3E%3Crect x=%2712%27 y=%2712%27 width=%2776%27 height=%2776%27 fill=%27none%27 stroke=%27%2316324f%27 stroke-width=%276%27/%3E%3Ctext x=%2750%27 y=%2766%27 font-family=%27Georgia,serif%27 font-style=%27italic%27 font-size=%2748%27 fill=%27%2316324f%27 text-anchor=%27middle%27%3ES%3C/text%3E%3C/svg%3E" />
 <link rel="stylesheet" href="shared/styles.css" />
 </head>
 <body>
@@ -81,11 +81,11 @@ function Dashboard() {
           <StatCard label="Today" value={todayMin / 60} suffix="h" sub={S.formatMinutes(todayMin)} />
           <StatCard label="This Week" value={weekMin / 60} suffix="h" sub={S.formatMinutes(weekMin)} />
           <StatCard label="All Time" value={totalMin / 60} suffix="h" sub={sessions.length + (sessions.length === 1 ? " session logged" : " sessions logged")} />
-          <StatCard label="Streak" value={streak} suffix=" 🔥" sub={streak === 1 ? "day in a row" : "days in a row"} />
+          <StatCard label="Streak" value={streak} suffix="d" sub={streak === 1 ? "day in a row" : "days in a row"} />
         </div>
 
         <div className="sf-grid cols-2" style={{ marginTop: 34, alignItems: "start" }}>
-          <div className="sf-card hoverable" style={{ padding: 24, animation: "fadeInUp .6s ease .1s both" }}>
+          <div className="sf-card hoverable" style={{ padding: 24 }}>
             <h3 style={{ fontSize: "1.05rem", marginBottom: 4 }}>Ready to focus?</h3>
             <p style={{ color: "var(--text-muted)", fontSize: "0.88rem", marginTop: 6, lineHeight: 1.5 }}>
               Start a live session or log time you've already put in.
@@ -113,21 +113,21 @@ function Dashboard() {
             ))}
           </div>
 
-          <div className="sf-card hoverable" style={{ padding: 24, animation: "fadeInUp .6s ease .18s both" }}>
+          <div className="sf-card hoverable" style={{ padding: 24 }}>
             <h3 style={{ fontSize: "1.05rem", marginBottom: 14 }}>Recent sessions</h3>
             {recent.length === 0 && (
               <div className="sf-empty">
-                <div className="sf-empty-icon">🗒️</div>
+                <div className="sf-empty-mark"></div>
                 <div>Nothing logged yet.</div>
               </div>
             )}
             {recent.map((s) => {
               const subj = subjects.find((x) => x.id === s.subjectId);
               return (
-                <div key={s.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: "1px solid var(--border)" }}>
+                <div key={s.id} className="sf-ledger-row" style={{ padding: "10px 0", borderBottom: "1px solid var(--rule)" }}>
                   <div>
                     <div style={{ fontWeight: 600, fontSize: "0.88rem", display: "flex", alignItems: "center", gap: 6 }}>
-                      <span className="sf-dot" style={{ background: subj ? subj.color : "#94a3b8" }}></span>
+                      <span className="sf-dot" style={{ background: subj ? subj.color : "var(--text-faint)" }}></span>
                       {subj ? subj.name : "Deleted subject"}
                     </div>
                     <div style={{ fontSize: "0.75rem", color: "var(--text-faint)", marginTop: 2 }}>{s.date}</div>
@@ -137,7 +137,7 @@ function Dashboard() {
               );
             })}
             {sessions.length > 0 && (
-              <a href="log.html" style={{ display: "inline-block", marginTop: 14, fontSize: "0.85rem", color: "var(--blue-600)", fontWeight: 600, textDecoration: "none" }}>
+              <a href="log.html" style={{ display: "inline-block", marginTop: 14, fontSize: "0.85rem", color: "var(--ink-2)", fontWeight: 600, textDecoration: "none" }}>
                 View full log →
               </a>
             )}
@@ -147,24 +147,24 @@ function Dashboard() {
         <div style={{ marginTop: 34 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
             <h3 style={{ fontSize: "1.05rem" }}>Top picks from your video library</h3>
-            <a href="videos.html" style={{ fontSize: "0.85rem", color: "var(--blue-600)", fontWeight: 600, textDecoration: "none" }}>See all →</a>
+            <a href="videos.html" style={{ fontSize: "0.85rem", color: "var(--ink-2)", fontWeight: 600, textDecoration: "none" }}>See all →</a>
           </div>
           {topVideos.length === 0 ? (
             <div className="sf-card sf-empty" style={{ marginTop: 14 }}>
-              <div className="sf-empty-icon">🎬</div>
+              <div className="sf-empty-mark"></div>
               <div>No videos saved yet — add the ones that actually helped.</div>
               <a href="videos.html" className="sf-btn ghost" style={{ marginTop: 14 }}>Add a video</a>
             </div>
           ) : (
             <div className="sf-grid cols-3" style={{ marginTop: 14 }}>
               {topVideos.map((v, i) => (
-                <div key={v.id} className="sf-card hoverable" style={{ overflow: "hidden", animation: `fadeInUp .5s ease ${0.05 * i}s both` }}>
+                <div key={v.id} className="sf-card hoverable" style={{ overflow: "hidden" }}>
                   <div className="sf-video-thumb" style={{ cursor: "default" }}>
                     <img src={`https://img.youtube.com/vi/${v.videoId}/hqdefault.jpg`} alt={v.title} />
                   </div>
                   <div style={{ padding: "14px 16px" }}>
                     <div style={{ fontWeight: 600, fontSize: "0.88rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{v.title}</div>
-                    <div style={{ marginTop: 6, color: "#f59e0b", fontSize: "0.8rem" }}>{"★".repeat(v.rating)}{"☆".repeat(5 - v.rating)}</div>
+                    <div style={{ marginTop: 6, color: "var(--gold)", fontSize: "0.8rem" }}>{"★".repeat(v.rating)}{"☆".repeat(5 - v.rating)}</div>
                   </div>
                 </div>
               ))}

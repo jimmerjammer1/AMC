@@ -6,7 +6,8 @@
     videos: "sf_videos",
   };
 
-  const SUBJECT_COLORS = ["#2563eb", "#6366f1", "#06b6d4", "#8b5cf6", "#0ea5e9", "#14b8a6", "#3b82f6", "#4f46e5"];
+  // "Fountain pen ink" palette — muted, ledger-appropriate, not bright SaaS hues.
+  const SUBJECT_COLORS = ["#1d4f91", "#2e6f6e", "#8a3b3b", "#5b4b8a", "#7a5c1e", "#3f5e3a", "#4b5d67", "#1f4d3d"];
 
   function uid() {
     return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);

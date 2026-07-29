@@ -4,7 +4,8 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Studyflow — Stats</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📘</text></svg>" />
+<meta name="description" content="Charts and trends on study time: daily momentum, subject breakdown, and a 90-day consistency view." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 fill=%27%23e9eef2%27/%3E%3Crect x=%2712%27 y=%2712%27 width=%2776%27 height=%2776%27 fill=%27none%27 stroke=%27%2316324f%27 stroke-width=%276%27/%3E%3Ctext x=%2750%27 y=%2766%27 font-family=%27Georgia,serif%27 font-style=%27italic%27 font-size=%2748%27 fill=%27%2316324f%27 text-anchor=%27middle%27%3ES%3C/text%3E%3C/svg%3E" />
 <link rel="stylesheet" href="shared/styles.css" />
 </head>
 <body>
@@ -49,7 +50,7 @@ function Donut({ rows }) {
     const end = (acc / (total || 1)) * 360;
     return `${r.subject.color} ${start}deg ${end}deg`;
   });
-  const gradient = total > 0 ? `conic-gradient(${stops.join(",")})` : "conic-gradient(var(--bg-soft) 0deg 360deg)";
+  const gradient = total > 0 ? `conic-gradient(${stops.join(",")})` : "conic-gradient(var(--paper-deep) 0deg 360deg)";
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 24, flexWrap: "wrap" }}>
       <div
@@ -58,12 +59,12 @@ function Donut({ rows }) {
           width: 150, height: 150, borderRadius: "50%",
           background: gradient,
           display: "flex", alignItems: "center", justifyContent: "center",
-          boxShadow: "var(--shadow-sm)", flexShrink: 0,
+          border: "1px solid var(--ink)", flexShrink: 0,
         }}
       >
-        <div style={{ width: 96, height: 96, borderRadius: "50%", background: "var(--surface)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-          <div style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: "1.15rem" }}>{S.formatHoursDecimal(total)}h</div>
-          <div style={{ fontSize: "0.65rem", color: "var(--text-faint)" }}>total</div>
+        <div style={{ width: 96, height: 96, borderRadius: "50%", background: "var(--panel)", border: "1px solid var(--rule)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+          <div className="mono" style={{ fontWeight: 600, fontSize: "1.1rem", color: "var(--ink)" }}>{S.formatHoursDecimal(total)}h</div>
+          <div className="mono" style={{ fontSize: "0.62rem", color: "var(--text-faint)" }}>total</div>
         </div>
       </div>
       <div style={{ flex: 1, minWidth: 180 }}>
@@ -90,10 +91,10 @@ function HeatCalendar({ sessions }) {
   const max = Math.max(1, ...Object.values(byDate));
 
   function shade(minutes) {
-    if (!minutes) return "var(--bg-soft)";
+    if (!minutes) return "var(--paper-deep)";
     const t = Math.min(1, minutes / max);
-    const alpha = 0.22 + t * 0.78;
-    return `rgba(37, 99, 235, ${alpha.toFixed(2)})`;
+    const alpha = 0.25 + t * 0.75;
+    return `rgba(22, 50, 79, ${alpha.toFixed(2)})`;
   }
 
   return (
@@ -103,7 +104,7 @@ function HeatCalendar({ sessions }) {
           key={d}
           title={`${d}: ${S.formatMinutes(byDate[d] || 0)}`}
           style={{
-            aspectRatio: "1", borderRadius: 4, background: shade(byDate[d]),
+            aspectRatio: "1", border: "1px solid var(--rule)", background: shade(byDate[d]),
             animation: `popIn .3s ease ${Math.min(i, 60) * 0.006}s both`,
           }}
         ></div>
@@ -160,17 +161,17 @@ function StatsPage() {
         </div>
 
         <div className="sf-grid cols-2" style={{ marginTop: 28, alignItems: "start" }}>
-          <div className="sf-card hoverable" style={{ padding: 26, animation: "fadeInUp .55s ease .1s both" }}>
+          <div className="sf-card hoverable" style={{ padding: 26 }}>
             <h3 style={{ fontSize: "1.02rem", marginBottom: 16 }}>Last 14 days</h3>
             <BarChart data={dayData} />
           </div>
-          <div className="sf-card hoverable" style={{ padding: 26, animation: "fadeInUp .55s ease .18s both" }}>
+          <div className="sf-card hoverable" style={{ padding: 26 }}>
             <h3 style={{ fontSize: "1.02rem", marginBottom: 16 }}>By subject</h3>
             <Donut rows={bySubject} />
           </div>
         </div>
 
-        <div className="sf-card hoverable" style={{ padding: 26, marginTop: 24, animation: "fadeInUp .55s ease .24s both" }}>
+        <div className="sf-card hoverable" style={{ padding: 26, marginTop: 24 }}>
           <h3 style={{ fontSize: "1.02rem", marginBottom: 16 }}>Consistency — last 90 days</h3>
           <HeatCalendar sessions={sessions} />
         </div>
