@@ -306,6 +306,38 @@ function History({ sessions, subjects, onDelete }) {
   );
 }
 
+function TotalsSummary({ sessions, subjects }) {
+  const S = window.Store;
+  const total = S.totalMinutes(sessions);
+  const bySubject = S.bySubject(sessions, subjects).filter((r) => r.minutes > 0);
+
+  return (
+    <div className="sf-card hoverable" style={{ padding: 28, marginTop: 24 }}>
+      <h3 style={{ fontSize: "1.05rem", marginBottom: 4 }}>Totals</h3>
+      <p style={{ color: "var(--text-muted)", fontSize: "0.85rem", marginBottom: 18 }}>Every minute logged, all time.</p>
+
+      <div className="sf-ledger-row" style={{ padding: "14px 0", borderBottom: "2px solid var(--ink)" }}>
+        <span style={{ fontWeight: 700 }}>All subjects</span>
+        <span className="mono" style={{ fontWeight: 600, fontSize: "1.1rem", color: "var(--ink)" }}>{S.formatMinutes(total)}</span>
+      </div>
+
+      {bySubject.length === 0 ? (
+        <p style={{ color: "var(--text-faint)", fontSize: "0.85rem", marginTop: 14 }}>No subject totals yet — log a session above.</p>
+      ) : (
+        bySubject.map((row) => (
+          <div key={row.subject.id} className="sf-ledger-row" style={{ padding: "10px 0", borderBottom: "1px solid var(--rule)" }}>
+            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span className="sf-dot" style={{ background: row.subject.color }}></span>
+              {row.subject.name}
+            </span>
+            <span className="mono" style={{ color: "var(--text-muted)" }}>{S.formatMinutes(row.minutes)}</span>
+          </div>
+        ))
+      )}
+    </div>
+  );
+}
+
 function LogPage() {
   const [subjects, setSubjects] = useState([]);
   const [sessions, setSessions] = useState([]);
@@ -331,6 +363,7 @@ function LogPage() {
         </div>
 
         <History sessions={sessions} subjects={subjects} onDelete={(id) => { window.Store.deleteSession(id); refresh(); }} />
+        <TotalsSummary sessions={sessions} subjects={subjects} />
         <footer className="sf-foot">Studyflow — private, local, and only for you.</footer>
       </main>
     </React.Fragment>
