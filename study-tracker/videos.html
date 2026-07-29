@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Studyflow — Videos</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📘</text></svg>" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 fill=%27%23e9eef2%27/%3E%3Crect x=%2712%27 y=%2712%27 width=%2776%27 height=%2776%27 fill=%27none%27 stroke=%27%2316324f%27 stroke-width=%276%27/%3E%3Ctext x=%2750%27 y=%2766%27 font-family=%27Georgia,serif%27 font-style=%27italic%27 font-size=%2748%27 fill=%27%2316324f%27 text-anchor=%27middle%27%3ES%3C/text%3E%3C/svg%3E" />
 <link rel="stylesheet" href="shared/styles.css" />
 </head>
 <body>
@@ -27,7 +27,7 @@ function StarPicker({ value, onChange }) {
         <span
           key={n}
           onClick={() => onChange(n === value ? 0 : n)}
-          style={{ cursor: "pointer", fontSize: "1.3rem", color: n <= value ? "#f59e0b" : "#d8e0f2", transition: "transform .15s ease" }}
+          style={{ cursor: "pointer", fontSize: "1.3rem", color: n <= value ? "var(--gold)" : "var(--rule-strong)", transition: "transform .15s ease" }}
           onMouseDown={(e) => (e.currentTarget.style.transform = "scale(1.2)")}
           onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
         >
@@ -73,7 +73,7 @@ function AddVideoModal({ subjects, onClose, onAdded }) {
         <div className="sf-field">
           <label className="sf-label">YouTube URL</label>
           <input className="sf-input" autoFocus placeholder="https://youtube.com/watch?v=..." value={url} onChange={(e) => { setUrl(e.target.value); setError(""); }} />
-          {error && <div style={{ color: "#dc2626", fontSize: "0.78rem", marginTop: 6 }}>{error}</div>}
+          {error && <div style={{ color: "var(--accent)", fontSize: "0.78rem", marginTop: 6 }}>{error}</div>}
         </div>
         <div className="sf-field">
           <label className="sf-label">Title</label>
@@ -131,7 +131,7 @@ function VideoCard({ video, subject, onDelete, index }) {
           <div style={{ fontWeight: 700, fontSize: "0.92rem", lineHeight: 1.3 }}>{video.title}</div>
           <button onClick={() => onDelete(video.id)} aria-label="Delete video" style={{ border: "none", background: "none", cursor: "pointer", color: "var(--text-faint)", flexShrink: 0 }}>✕</button>
         </div>
-        {video.rating > 0 && <div style={{ color: "#f59e0b", fontSize: "0.85rem", marginTop: 6 }}>{"★".repeat(video.rating)}{"☆".repeat(5 - video.rating)}</div>}
+        {video.rating > 0 && <div style={{ color: "var(--gold)", fontSize: "0.85rem", marginTop: 6 }}>{"★".repeat(video.rating)}{"☆".repeat(5 - video.rating)}</div>}
         {video.notes && <p style={{ fontSize: "0.82rem", color: "var(--text-muted)", marginTop: 8, lineHeight: 1.5 }}>{video.notes}</p>}
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 12 }}>
           {subject && <span className="sf-chip" style={{ background: subject.color + "1a", color: subject.color, borderColor: subject.color + "33" }}>{subject.name}</span>}
@@ -185,7 +185,7 @@ function VideosPage() {
 
         {filtered.length === 0 ? (
           <div className="sf-card sf-empty" style={{ marginTop: 24 }}>
-            <div className="sf-empty-icon">🎬</div>
+            <div className="sf-empty-mark"></div>
             <div>{videos.length === 0 ? "No videos saved yet." : "No videos match your filters."}</div>
             {videos.length === 0 && <button className="sf-btn ghost" style={{ marginTop: 14 }} onClick={() => setShowModal(true)}>Add your first video</button>}
           </div>
