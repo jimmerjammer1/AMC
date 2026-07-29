@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Studyflow — Stats</title>
+<meta name="description" content="Charts and trends on study time: daily momentum, subject breakdown, and a 90-day consistency view." />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 fill=%27%23e9eef2%27/%3E%3Crect x=%2712%27 y=%2712%27 width=%2776%27 height=%2776%27 fill=%27none%27 stroke=%27%2316324f%27 stroke-width=%276%27/%3E%3Ctext x=%2750%27 y=%2766%27 font-family=%27Georgia,serif%27 font-style=%27italic%27 font-size=%2748%27 fill=%27%2316324f%27 text-anchor=%27middle%27%3ES%3C/text%3E%3C/svg%3E" />
 <link rel="stylesheet" href="shared/styles.css" />
 </head>
@@ -160,17 +161,17 @@ function StatsPage() {
         </div>
 
         <div className="sf-grid cols-2" style={{ marginTop: 28, alignItems: "start" }}>
-          <div className="sf-card hoverable" style={{ padding: 26, animation: "fadeInUp .55s ease .1s both" }}>
+          <div className="sf-card hoverable" style={{ padding: 26 }}>
             <h3 style={{ fontSize: "1.02rem", marginBottom: 16 }}>Last 14 days</h3>
             <BarChart data={dayData} />
           </div>
-          <div className="sf-card hoverable" style={{ padding: 26, animation: "fadeInUp .55s ease .18s both" }}>
+          <div className="sf-card hoverable" style={{ padding: 26 }}>
             <h3 style={{ fontSize: "1.02rem", marginBottom: 16 }}>By subject</h3>
             <Donut rows={bySubject} />
           </div>
         </div>
 
-        <div className="sf-card hoverable" style={{ padding: 26, marginTop: 24, animation: "fadeInUp .55s ease .24s both" }}>
+        <div className="sf-card hoverable" style={{ padding: 26, marginTop: 24 }}>
           <h3 style={{ fontSize: "1.02rem", marginBottom: 16 }}>Consistency — last 90 days</h3>
           <HeatCalendar sessions={sessions} />
         </div>

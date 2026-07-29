@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Studyflow — Study Log</title>
+<meta name="description" content="Run a live study timer or log time manually, and review your full session history." />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 fill=%27%23e9eef2%27/%3E%3Crect x=%2712%27 y=%2712%27 width=%2776%27 height=%2776%27 fill=%27none%27 stroke=%27%2316324f%27 stroke-width=%276%27/%3E%3Ctext x=%2750%27 y=%2766%27 font-family=%27Georgia,serif%27 font-style=%27italic%27 font-size=%2748%27 fill=%27%2316324f%27 text-anchor=%27middle%27%3ES%3C/text%3E%3C/svg%3E" />
 <link rel="stylesheet" href="shared/styles.css" />
 </head>
@@ -145,7 +146,7 @@ function TimerCard({ subjects, onSaved }) {
   }
 
   return (
-    <div className="sf-card hoverable" style={{ padding: 28, animation: "fadeInUp .55s ease both" }}>
+    <div className="sf-card hoverable" style={{ padding: 28 }}>
       <h3 style={{ fontSize: "1.05rem", marginBottom: 18 }}>Live session</h3>
 
       <StopwatchDial elapsed={elapsed} running={running} />
@@ -195,7 +196,7 @@ function ManualEntry({ subjects, onSaved }) {
   }
 
   return (
-    <form className="sf-card hoverable" style={{ padding: 28, animation: "fadeInUp .55s ease .1s both" }} onSubmit={handleSubmit}>
+    <form className="sf-card hoverable" style={{ padding: 28 }} onSubmit={handleSubmit}>
       <h3 style={{ fontSize: "1.05rem", marginBottom: 18 }}>Log time manually</h3>
       <SubjectPicker subjects={subjects} value={subjectId} onChange={setSubjectId} onAdd={addSubject} />
       <div style={{ display: "flex", gap: 12 }}>
@@ -223,7 +224,7 @@ function ManualEntry({ subjects, onSaved }) {
 
 function History({ sessions, subjects, onDelete }) {
   return (
-    <div className="sf-card hoverable" style={{ padding: 28, marginTop: 24, animation: "fadeInUp .55s ease .18s both" }}>
+    <div className="sf-card hoverable" style={{ padding: 28, marginTop: 24 }}>
       <h3 style={{ fontSize: "1.05rem", marginBottom: 16 }}>Full history</h3>
       {sessions.length === 0 && (
         <div className="sf-empty">
@@ -234,7 +235,7 @@ function History({ sessions, subjects, onDelete }) {
       {sessions.map((s) => {
         const subj = subjects.find((x) => x.id === s.subjectId);
         return (
-          <div key={s.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: "1px solid var(--rule)" }}>
+          <div key={s.id} className="sf-ledger-row" style={{ padding: "12px 0", borderBottom: "1px solid var(--rule)" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <span className="sf-dot" style={{ background: subj ? subj.color : "var(--text-faint)" }}></span>
               <div>

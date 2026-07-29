@@ -16,13 +16,13 @@
 
   --ink: #16324f;
   --ink-2: #2c5178;
-  --ink-soft: #5c7690;
+  --ink-soft: #44607c;
   --text: #16283a;
-  --text-muted: #5c7690;
-  --text-faint: #8497a8;
+  --text-muted: #44607c;
+  --text-faint: #506882;
 
   --accent: #a8462c;
-  --gold: #a5780f;
+  --gold: #8a6110;
 
   --radius: 3px;
   --notch: 16px;
@@ -264,10 +264,44 @@ a {
   .sf-grid.cols-4 { grid-template-columns: repeat(2, 1fr); }
   .sf-grid.cols-3 { grid-template-columns: repeat(2, 1fr); }
 }
-@media (max-width: 560px) {
-  .sf-nav-inner { flex-direction: column; align-items: flex-start; gap: 12px; }
-  .sf-links { width: 100%; justify-content: space-between; gap: 10px; }
-  .sf-grid.cols-4, .sf-grid.cols-3, .sf-grid.cols-2 { grid-template-columns: 1fr; }
+@media (max-width: 640px) {
+  .sf-nav-inner { flex-direction: column; align-items: stretch; gap: 0; padding: 14px 18px 0; }
+  .sf-links {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 0;
+    margin-top: 14px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 2px;
+  }
+  .sf-link { flex: 0 0 auto; padding: 8px 12px 10px 0; font-size: 0.82rem; }
+  .sf-page { padding: 30px 18px 70px; }
+  .sf-title { font-size: 1.7rem; }
+  .sf-grid.cols-4 { grid-template-columns: repeat(2, 1fr); }
+  .sf-grid.cols-3, .sf-grid.cols-2 { grid-template-columns: 1fr; }
+  .sf-timer-ring { width: 180px; height: 180px; }
+  .sf-timer-time { font-size: 1.5rem; }
+  .sf-modal { padding: 22px; }
+}
+
+@media (max-width: 420px) {
+  .sf-grid.cols-4 { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .sf-stat { padding: 14px 16px; }
+  .sf-stat-value { font-size: 1.5rem; }
+}
+
+/* ---------- Ledger row (session/history list) ---------- */
+.sf-ledger-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+@media (max-width: 480px) {
+  .sf-ledger-row { align-items: flex-start; }
+  .sf-ledger-row > *:last-child { margin-left: auto; }
 }
 
 /* ---------- Stat tile ---------- */
@@ -357,9 +391,15 @@ a {
   color: var(--text);
   transition: border-color 0.15s ease;
 }
-.sf-input:focus, .sf-select:focus, .sf-textarea:focus {
-  outline: none;
+.sf-input:focus-visible, .sf-select:focus-visible, .sf-textarea:focus-visible {
+  outline: 2px solid var(--ink-2);
+  outline-offset: 1px;
   border-color: var(--ink);
+}
+
+a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .sf-label {
