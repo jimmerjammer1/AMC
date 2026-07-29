@@ -56,7 +56,7 @@
           LINKS.map((l) =>
             h(
               "a",
-              { key: l.key, href: l.href, className: "sf-link" + (l.key === active ? " active" : "") },
+              { key: l.key, href: l.href, className: "sf-link" + (l.key === active ? " active" : ""), "aria-label": l.label },
               h("span", { className: "sf-link-icon" }, l.icon),
               h("span", null, l.label)
             )
