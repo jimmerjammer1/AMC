@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Studyflow — Study Log</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📘</text></svg>" />
+<link rel="stylesheet" href="shared/styles.css" />
+</head>
+<body>
+<div id="root"></div>
+
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="shared/store.js"></script>
+<script src="shared/nav.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+const S = window.Store;
+const RADIUS = 100;
+const CIRC = 2 * Math.PI * RADIUS;
+
+function formatTime(totalSeconds) {
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const sec = totalSeconds % 60;
+  const pad = (n) => String(n).padStart(2, "0");
+  return h > 0 ? `${h}:${pad(m)}:${pad(sec)}` : `${pad(m)}:${pad(sec)}`;
+}
+
+function SubjectPicker({ subjects, value, onChange, onAdd }) {
+  const [adding, setAdding] = useState(false);
+  const [name, setName] = useState("");
+  return (
+    <div className="sf-field">
+      <label className="sf-label">Subject</label>
+      {!adding ? (
+        <div style={{ display: "flex", gap: 8 }}>
+          <select className="sf-select" value={value} onChange={(e) => onChange(e.target.value)}>
+            {subjects.map((s) => (
+              <option key={s.id} value={s.id}>{s.name}</option>
+            ))}
+          </select>
+          <button type="button" className="sf-btn ghost" onClick={() => setAdding(true)}>+ New</button>
+        </div>
+      ) : (
+        <div style={{ display: "flex", gap: 8 }}>
+          <input className="sf-input" autoFocus placeholder="e.g. Calculus" value={name} onChange={(e) => setName(e.target.value)} />
+          <button
+            type="button"
+            className="sf-btn primary"
+            onClick={() => {
+              if (!name.trim()) return;
+              const s = onAdd(name);
+              onChange(s.id);
+              setName("");
+              setAdding(false);
+            }}
+          >
+            Add
+          </button>
+          <button type="button" className="sf-btn ghost" onClick={() => setAdding(false)}>Cancel</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TimerCard({ subjects, onSaved }) {
+  const [subjectId, setSubjectId] = useState(subjects[0] ? subjects[0].id : "");
+  const [note, setNote] = useState("");
+  const [running, setRunning] = useState(false);
+  const [elapsed, setElapsed] = useState(0);
+  const intervalRef = useRef(null);
+
+  useEffect(() => {
+    if (!subjectId && subjects[0]) setSubjectId(subjects[0].id);
+  }, [subjects]);
+
+  useEffect(() => {
+    if (running) {
+      intervalRef.current = setInterval(() => setElapsed((e) => e + 1), 1000);
+    } else {
+      clearInterval(intervalRef.current);
+    }
+    return () => clearInterval(intervalRef.current);
+  }, [running]);
+
+  const addSubject = (name) => window.Store.addSubject(name);
+
+  const sweep = (elapsed % 60) / 60;
+  const offset = CIRC * (1 - sweep);
+
+  function handleStop() {
+    setRunning(false);
+    const minutes = elapsed / 60;
+    if (minutes >= 0.25 && subjectId) {
+      window.Store.addSession({ subjectId, minutes, date: window.Store.todayISO(), note });
+      onSaved();
+    }
+    setElapsed(0);
+    setNote("");
+  }
+
+  return (
+    <div className="sf-card hoverable" style={{ padding: 28, animation: "fadeInUp .55s ease both" }}>
+      <h3 style={{ fontSize: "1.05rem", marginBottom: 18 }}>Live session</h3>
+
+      <div className={"sf-timer-ring" + (running ? " active" : "")}>
+        <svg viewBox="0 0 220 220">
+          <defs>
+            <linearGradient id="sf-ring-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#2563eb" />
+              <stop offset="55%" stopColor="#6366f1" />
+              <stop offset="100%" stopColor="#06b6d4" />
+            </linearGradient>
+          </defs>
+          <circle className="track" cx="110" cy="110" r={RADIUS} />
+          <circle className="fill" cx="110" cy="110" r={RADIUS} strokeDasharray={CIRC} strokeDashoffset={offset} />
+        </svg>
+        <div className="sf-timer-center">
+          <div className="sf-timer-time">{formatTime(elapsed)}</div>
+          {running && <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6, fontSize: "0.75rem", color: "var(--text-muted)", fontWeight: 600 }}><span className="sf-pulse-dot"></span>focusing</div>}
+        </div>
+      </div>
+
+      <div style={{ marginTop: 22 }}>
+        <SubjectPicker subjects={subjects} value={subjectId} onChange={setSubjectId} onAdd={addSubject} />
+        <div className="sf-field">
+          <label className="sf-label">Note (optional)</label>
+          <input className="sf-input" placeholder="What are you working on?" value={note} onChange={(e) => setNote(e.target.value)} />
+        </div>
+      </div>
+
+      <div style={{ display: "flex", gap: 10 }}>
+        {!running ? (
+          <button className="sf-btn primary" style={{ flex: 1 }} onClick={() => setRunning(true)} disabled={!subjectId}>▶ Start</button>
+        ) : (
+          <button className="sf-btn ghost" style={{ flex: 1 }} onClick={() => setRunning(false)}>⏸ Pause</button>
+        )}
+        <button className="sf-btn danger" style={{ flex: 1 }} onClick={handleStop} disabled={elapsed === 0}>■ Stop & Save</button>
+      </div>
+    </div>
+  );
+}
+
+function ManualEntry({ subjects, onSaved }) {
+  const [subjectId, setSubjectId] = useState(subjects[0] ? subjects[0].id : "");
+  const [hours, setHours] = useState("");
+  const [minutes, setMinutes] = useState("");
+  const [date, setDate] = useState(window.Store.todayISO());
+  const [note, setNote] = useState("");
+
+  useEffect(() => {
+    if (!subjectId && subjects[0]) setSubjectId(subjects[0].id);
+  }, [subjects]);
+
+  const addSubject = (name) => window.Store.addSubject(name);
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    const total = (parseFloat(hours) || 0) * 60 + (parseFloat(minutes) || 0);
+    if (total <= 0 || !subjectId) return;
+    window.Store.addSession({ subjectId, minutes: total, date, note });
+    setHours("");
+    setMinutes("");
+    setNote("");
+    onSaved();
+  }
+
+  return (
+    <form className="sf-card hoverable" style={{ padding: 28, animation: "fadeInUp .55s ease .1s both" }} onSubmit={handleSubmit}>
+      <h3 style={{ fontSize: "1.05rem", marginBottom: 18 }}>Log time manually</h3>
+      <SubjectPicker subjects={subjects} value={subjectId} onChange={setSubjectId} onAdd={addSubject} />
+      <div style={{ display: "flex", gap: 12 }}>
+        <div className="sf-field" style={{ flex: 1 }}>
+          <label className="sf-label">Hours</label>
+          <input className="sf-input" type="number" min="0" placeholder="0" value={hours} onChange={(e) => setHours(e.target.value)} />
+        </div>
+        <div className="sf-field" style={{ flex: 1 }}>
+          <label className="sf-label">Minutes</label>
+          <input className="sf-input" type="number" min="0" max="59" placeholder="0" value={minutes} onChange={(e) => setMinutes(e.target.value)} />
+        </div>
+      </div>
+      <div className="sf-field">
+        <label className="sf-label">Date</label>
+        <input className="sf-input" type="date" value={date} max={window.Store.todayISO()} onChange={(e) => setDate(e.target.value)} />
+      </div>
+      <div className="sf-field">
+        <label className="sf-label">Note (optional)</label>
+        <input className="sf-input" placeholder="What did you cover?" value={note} onChange={(e) => setNote(e.target.value)} />
+      </div>
+      <button className="sf-btn primary" style={{ width: "100%" }} type="submit">Add Session</button>
+    </form>
+  );
+}
+
+function History({ sessions, subjects, onDelete }) {
+  return (
+    <div className="sf-card hoverable" style={{ padding: 28, marginTop: 24, animation: "fadeInUp .55s ease .18s both" }}>
+      <h3 style={{ fontSize: "1.05rem", marginBottom: 16 }}>Full history</h3>
+      {sessions.length === 0 && (
+        <div className="sf-empty">
+          <div className="sf-empty-icon">🗒️</div>
+          <div>No sessions logged yet — start the timer above or add one manually.</div>
+        </div>
+      )}
+      {sessions.map((s) => {
+        const subj = subjects.find((x) => x.id === s.subjectId);
+        return (
+          <div key={s.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: "1px solid var(--border)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <span className="sf-dot" style={{ background: subj ? subj.color : "#94a3b8" }}></span>
+              <div>
+                <div style={{ fontWeight: 600, fontSize: "0.88rem" }}>{subj ? subj.name : "Deleted subject"}</div>
+                <div style={{ fontSize: "0.75rem", color: "var(--text-faint)" }}>{s.date}{s.note ? " · " + s.note : ""}</div>
+              </div>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div className="sf-chip">{window.Store.formatMinutes(s.minutes)}</div>
+              <button
+                onClick={() => onDelete(s.id)}
+                aria-label="Delete session"
+                style={{ border: "none", background: "none", cursor: "pointer", color: "var(--text-faint)", fontSize: "1rem", lineHeight: 1 }}
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function LogPage() {
+  const [subjects, setSubjects] = useState([]);
+  const [sessions, setSessions] = useState([]);
+
+  function refresh() {
+    setSubjects(window.Store.getSubjects());
+    setSessions(window.Store.getSessions());
+  }
+
+  useEffect(refresh, []);
+
+  return (
+    <React.Fragment>
+      {SFNav("log")}
+      <main className="sf-page">
+        <span className="sf-eyebrow">Study Log</span>
+        <h1 className="sf-title">Track every focused minute.</h1>
+        <p className="sf-subtitle">Run a live timer while you work, or backfill a session you already finished.</p>
+
+        <div className="sf-grid cols-2" style={{ marginTop: 30, alignItems: "start" }}>
+          <TimerCard subjects={subjects} onSaved={refresh} />
+          <ManualEntry subjects={subjects} onSaved={refresh} />
+        </div>
+
+        <History sessions={sessions} subjects={subjects} onDelete={(id) => { window.Store.deleteSession(id); refresh(); }} />
+        <footer className="sf-foot">Studyflow — private, local, and only for you.</footer>
+      </main>
+    </React.Fragment>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<LogPage />);
+</script>
+</body>
+</html>

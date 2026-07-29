@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Studyflow — Videos</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📘</text></svg>" />
+<link rel="stylesheet" href="shared/styles.css" />
+</head>
+<body>
+<div id="root"></div>
+
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="shared/store.js"></script>
+<script src="shared/nav.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script type="text/babel">
+const { useState, useEffect, useMemo } = React;
+const S = window.Store;
+
+function StarPicker({ value, onChange }) {
+  return (
+    <div style={{ display: "flex", gap: 4 }}>
+      {[1, 2, 3, 4, 5].map((n) => (
+        <span
+          key={n}
+          onClick={() => onChange(n === value ? 0 : n)}
+          style={{ cursor: "pointer", fontSize: "1.3rem", color: n <= value ? "#f59e0b" : "#d8e0f2", transition: "transform .15s ease" }}
+          onMouseDown={(e) => (e.currentTarget.style.transform = "scale(1.2)")}
+          onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
+        >
+          ★
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function AddVideoModal({ subjects, onClose, onAdded }) {
+  const [url, setUrl] = useState("");
+  const [title, setTitle] = useState("");
+  const [notes, setNotes] = useState("");
+  const [tags, setTags] = useState("");
+  const [subjectId, setSubjectId] = useState(subjects[0] ? subjects[0].id : "");
+  const [rating, setRating] = useState(0);
+  const [error, setError] = useState("");
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    const videoId = S.extractYouTubeId(url);
+    if (!videoId) {
+      setError("That doesn't look like a valid YouTube link.");
+      return;
+    }
+    S.addVideo({
+      url,
+      title,
+      notes,
+      tags: tags.split(",").map((t) => t.trim()).filter(Boolean),
+      subjectId: subjectId || null,
+      rating,
+    });
+    onAdded();
+    onClose();
+  }
+
+  return (
+    <div className="sf-modal-backdrop" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <form className="sf-modal" onSubmit={handleSubmit}>
+        <h3 style={{ fontSize: "1.15rem", marginBottom: 18 }}>Add a YouTube video</h3>
+        <div className="sf-field">
+          <label className="sf-label">YouTube URL</label>
+          <input className="sf-input" autoFocus placeholder="https://youtube.com/watch?v=..." value={url} onChange={(e) => { setUrl(e.target.value); setError(""); }} />
+          {error && <div style={{ color: "#dc2626", fontSize: "0.78rem", marginTop: 6 }}>{error}</div>}
+        </div>
+        <div className="sf-field">
+          <label className="sf-label">Title</label>
+          <input className="sf-input" placeholder="Why this video is worth watching" value={title} onChange={(e) => setTitle(e.target.value)} />
+        </div>
+        <div className="sf-field">
+          <label className="sf-label">Subject</label>
+          <select className="sf-select" value={subjectId} onChange={(e) => setSubjectId(e.target.value)}>
+            <option value="">None</option>
+            {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+          </select>
+        </div>
+        <div className="sf-field">
+          <label className="sf-label">Tags (comma separated)</label>
+          <input className="sf-input" placeholder="derivatives, review, exam prep" value={tags} onChange={(e) => setTags(e.target.value)} />
+        </div>
+        <div className="sf-field">
+          <label className="sf-label">Your notes</label>
+          <textarea className="sf-textarea" rows="3" placeholder="What makes this one worth coming back to?" value={notes} onChange={(e) => setNotes(e.target.value)} />
+        </div>
+        <div className="sf-field">
+          <label className="sf-label">Rating</label>
+          <StarPicker value={rating} onChange={setRating} />
+        </div>
+        <div style={{ display: "flex", gap: 10, marginTop: 6 }}>
+          <button type="button" className="sf-btn ghost" style={{ flex: 1 }} onClick={onClose}>Cancel</button>
+          <button type="submit" className="sf-btn primary" style={{ flex: 1 }}>Save video</button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+function VideoCard({ video, subject, onDelete, index }) {
+  const [playing, setPlaying] = useState(false);
+  return (
+    <div className="sf-card hoverable" style={{ overflow: "hidden", animation: `fadeInUp .5s ease ${Math.min(index, 8) * 0.05}s both` }}>
+      <div className="sf-video-thumb" onClick={() => setPlaying(true)}>
+        {playing ? (
+          <iframe
+            src={`https://www.youtube.com/embed/${video.videoId}?autoplay=1`}
+            title={video.title}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        ) : (
+          <React.Fragment>
+            <img src={`https://img.youtube.com/vi/${video.videoId}/hqdefault.jpg`} alt={video.title} loading="lazy" />
+            <div className="play-btn"><span>▶</span></div>
+          </React.Fragment>
+        )}
+      </div>
+      <div style={{ padding: "16px 18px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "flex-start" }}>
+          <div style={{ fontWeight: 700, fontSize: "0.92rem", lineHeight: 1.3 }}>{video.title}</div>
+          <button onClick={() => onDelete(video.id)} aria-label="Delete video" style={{ border: "none", background: "none", cursor: "pointer", color: "var(--text-faint)", flexShrink: 0 }}>✕</button>
+        </div>
+        {video.rating > 0 && <div style={{ color: "#f59e0b", fontSize: "0.85rem", marginTop: 6 }}>{"★".repeat(video.rating)}{"☆".repeat(5 - video.rating)}</div>}
+        {video.notes && <p style={{ fontSize: "0.82rem", color: "var(--text-muted)", marginTop: 8, lineHeight: 1.5 }}>{video.notes}</p>}
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 12 }}>
+          {subject && <span className="sf-chip" style={{ background: subject.color + "1a", color: subject.color, borderColor: subject.color + "33" }}>{subject.name}</span>}
+          {video.tags.map((t) => <span key={t} className="sf-chip">#{t}</span>)}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function VideosPage() {
+  const [videos, setVideos] = useState([]);
+  const [subjects, setSubjects] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [search, setSearch] = useState("");
+  const [subjectFilter, setSubjectFilter] = useState("all");
+
+  function refresh() {
+    setVideos(S.getVideos());
+    setSubjects(S.getSubjects());
+  }
+  useEffect(refresh, []);
+
+  const filtered = useMemo(() => {
+    return videos.filter((v) => {
+      if (subjectFilter !== "all" && v.subjectId !== subjectFilter) return false;
+      if (!search.trim()) return true;
+      const q = search.toLowerCase();
+      return v.title.toLowerCase().includes(q) || v.tags.some((t) => t.toLowerCase().includes(q)) || v.notes.toLowerCase().includes(q);
+    });
+  }, [videos, search, subjectFilter]);
+
+  return (
+    <React.Fragment>
+      {SFNav("videos")}
+      <main className="sf-page">
+        <span className="sf-eyebrow">Video Library</span>
+        <h1 className="sf-title">The videos that actually taught you something.</h1>
+        <p className="sf-subtitle">Save the best explanations, tag them by subject, and rate them so future-you knows exactly where to look.</p>
+
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 26, alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", gap: 10, flex: 1, minWidth: 260 }}>
+            <input className="sf-input" placeholder="Search videos, tags, notes…" value={search} onChange={(e) => setSearch(e.target.value)} style={{ maxWidth: 320 }} />
+            <select className="sf-select" value={subjectFilter} onChange={(e) => setSubjectFilter(e.target.value)} style={{ maxWidth: 200 }}>
+              <option value="all">All subjects</option>
+              {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+            </select>
+          </div>
+          <button className="sf-btn primary" onClick={() => setShowModal(true)}>+ Add video</button>
+        </div>
+
+        {filtered.length === 0 ? (
+          <div className="sf-card sf-empty" style={{ marginTop: 24 }}>
+            <div className="sf-empty-icon">🎬</div>
+            <div>{videos.length === 0 ? "No videos saved yet." : "No videos match your filters."}</div>
+            {videos.length === 0 && <button className="sf-btn ghost" style={{ marginTop: 14 }} onClick={() => setShowModal(true)}>Add your first video</button>}
+          </div>
+        ) : (
+          <div className="sf-grid cols-3" style={{ marginTop: 22 }}>
+            {filtered.map((v, i) => (
+              <VideoCard
+                key={v.id}
+                video={v}
+                index={i}
+                subject={subjects.find((s) => s.id === v.subjectId)}
+                onDelete={(id) => { S.deleteVideo(id); refresh(); }}
+              />
+            ))}
+          </div>
+        )}
+
+        {showModal && <AddVideoModal subjects={subjects} onClose={() => setShowModal(false)} onAdded={refresh} />}
+        <footer className="sf-foot">Studyflow — private, local, and only for you.</footer>
+      </main>
+    </React.Fragment>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<VideosPage />);
+</script>
+</body>
+</html>
